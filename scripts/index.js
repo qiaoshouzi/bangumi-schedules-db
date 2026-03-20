@@ -1,0 +1,83 @@
+import fs from 'node:fs'
+import path from 'node:path'
+import { fetch } from 'undici'
+
+const year = 2026
+const month = 1
+
+const PUBLIC_COOKIES = {
+  anime_schedule_wiki_lang: 'zh-CN',
+  anime_schedule_lang: 'zh-CN',
+}
+
+class API {
+  token = undefined
+
+  getTokenFromHeaders(resp) {
+    const cookies = resp.headers
+      .getSetCookie()
+      .map((v) => v.split('; ')[0]?.split('='))
+      .filter((v) => v?.[0] === 'anime_schedule_public_api_token')
+    return cookies?.[0]?.[1]
+  }
+  async getToken() {
+    const resp = await fetch('https://bgm.wiki')
+    if (!resp.ok) throw new Error(`getToken: fetchError: ${resp.status}: ${resp.statusText}`)
+    return this.getTokenFromHeaders(resp)
+  }
+  async getData(url) {
+    if (this.token === undefined) this.token = await this.getToken()
+
+    const headers = new Headers()
+    headers.set('x-public-api-token', this.token)
+    for (const [k, v] of Object.entries(PUBLIC_COOKIES)) headers.set(k, v)
+    const resp = await fetch(url, { headers })
+    if (!resp.ok) throw new Error(`getData: fetchError: ${resp.status}: ${resp.statusText}`)
+    this.token = this.getTokenFromHeaders(resp)
+    return await resp.json()
+  }
+}
+
+const main = async () => {
+  const testFolderPath = path.join(import.meta.dirname, '../test/', `${year}-${month}`)
+  fs.mkdirSync(testFolderPath, { recursive: true })
+
+  const api = new API()
+  // const catalogData = await api.getData(`https://bgm.wiki/api/season/${year}-${month}/catalog`)
+  // fs.writeFileSync(path.join(testFolderPath, 'data.json'), JSON.stringify(catalogData), 'utf-8')
+  const catalogData = JSON.parse(fs.readFileSync(path.join(testFolderPath, 'data.json'), 'utf-8'))
+  console.log(`Get Catalog data Done`)
+
+  const items = {}
+  for (const i of catalogData.items) {
+    const id = i.id
+    const isContinue = i.isContinue
+    const title = {
+      cn: i.title,
+      jp: i.japanTitle,
+    }
+
+    // const detailData = await api.getData(`https://bgm.wiki/api/anime/${id}/detail`)
+    // fs.writeFileSync(path.join(testFolderPath, `${id}.json`), JSON.stringify(detailData), 'utf-8')
+    const detailData = JSON.parse(fs.readFileSync(path.join(testFolderPath, `${id}.json`), 'utf-8'))
+    console.log(`Get Detail ${id} Done`)
+
+    const item = {
+      isContinue,
+      title,
+      schedules: []
+    }
+    for (const ii of detailData.anime.progressSlots[0].onairs) {
+      const platform = {
+        name: ii.platformDisplay,
+      }
+      const url = ii.url
+      if (url && url !== '') platform.url = url
+      const areas = ii.areasPrimary.map((v) => v.code)
+      item.schedules.push({ platform, areas })
+    }
+    items[id] = item
+  }
+  fs.writeFileSync(path.join(import.meta.dirname, '../data/', `${year}-${String(month).padStart(2, '0')}.json`), JSON.stringify(items), 'utf-8')
+}
+main()
