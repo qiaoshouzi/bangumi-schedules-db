@@ -74,7 +74,8 @@ const main = async () => {
       const url = ii.url
       if (url && url !== '') platform.url = url
       const areas = ii.areasPrimary.map((v) => v.code)
-      item.schedules.push({ platform, areas })
+      const time = ii.premiereTime
+      item.schedules.push({ platform, areas, time })
     }
     items[id] = item
   }
