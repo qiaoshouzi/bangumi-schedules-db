@@ -12,7 +12,7 @@ const PUBLIC_COOKIES = {
   anime_schedule_wiki_lang: 'zh-CN',
   anime_schedule_lang: 'zh-CN',
 }
-const langCode = 'zh-Hans'
+const langCode = 'zh-hans'
 
 class API {
   token = undefined
