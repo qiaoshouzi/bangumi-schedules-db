@@ -65,7 +65,7 @@ const main = async () => {
     const id = i.id
     const isContinue = i.isContinue
     const title = {
-      cn: i.title,
+      main: i.title,
       jp: i.japanTitle,
     }
 
