@@ -97,7 +97,7 @@ const main = async (lang) => {
       if (url && url !== '') platform.url = url
       const areas = ii.areasPrimary.map((v) => v.code)
       const time = ii.premiereTime
-      const licensors = ii.licensors.map((v) => v.displayName)
+      const licensors = ii.licensors?.map((v) => v.displayName) || []
       item.schedules.push({ platform, areas, time, licensors })
     }
     items[id] = item
