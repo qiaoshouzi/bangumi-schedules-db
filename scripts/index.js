@@ -6,7 +6,7 @@ const year = 2026
 const season = 2
 
 const PUBLIC_HEADER = {
-  'User-Agent': 'https://github.com/qiaoshouzi/bangumi-schedules-db'
+  'User-Agent': 'BangumiSchedules (+https://bgm.cfm.moe; https://github.com/qiaoshouzi/bangumi-schedules-db/blob/main/scripts/index.js)'
 }
 const PUBLIC_COOKIES = {
   anime_schedule_wiki_lang: 'zh-CN',
