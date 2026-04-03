@@ -27,7 +27,7 @@ class API {
   async getToken() {
     const headers = new Headers()
     for (const [k, v] of Object.entries(PUBLIC_HEADER)) headers.set(k, v)
-    const resp = await fetch('https://bgm.wiki')
+    const resp = await fetch('https://bgm.wiki', { headers })
     if (!resp.ok) throw new Error(`getToken: fetchError: ${resp.status}: ${resp.statusText}`)
     return this.getTokenFromHeaders(resp)
   }
@@ -58,10 +58,12 @@ const main = async () => {
     catalogData = await api.getData(`https://bgm.wiki/api/season/${year}-${season}/catalog`)
     fs.writeFileSync(catalogDataFilePath, JSON.stringify(catalogData), 'utf-8')
   }
-  console.log(`Get Catalog data Done`)
+  const itemsLength = catalogData.items.length
+  console.log(`Get Catalog data Done (${itemsLength})`)
 
   const items = {}
-  for (const i of catalogData.items) {
+  for (const index in catalogData.items) {
+    const i = catalogData.items[index]
     const id = i.id
     const isContinue = i.isContinue
     const title = {
@@ -77,7 +79,7 @@ const main = async () => {
       detailData = await api.getData(`https://bgm.wiki/api/anime/${id}/detail`)
       fs.writeFileSync(detailDataFilePath, JSON.stringify(detailData), 'utf-8')
     }
-    console.log(`Get Detail ${id} Done`)
+    console.log(`Get Detail ${id} Done (${Number(index) + 1}/${itemsLength})`)
 
     const item = {
       isContinue,
