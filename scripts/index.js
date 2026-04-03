@@ -3,7 +3,7 @@ import path from 'node:path'
 import { fetch } from 'undici'
 
 const year = 2026
-const month = 1
+const season = 2
 
 const PUBLIC_HEADER = {
   'User-Agent': 'https://github.com/qiaoshouzi/bangumi-schedules-db'
@@ -46,7 +46,7 @@ class API {
 }
 
 const main = async () => {
-  const testFolderPath = path.join(import.meta.dirname, '../test/', `${year}-${month}`, langCode)
+  const testFolderPath = path.join(import.meta.dirname, '../test/', `${year}-${season}`, langCode)
   fs.mkdirSync(testFolderPath, { recursive: true })
 
   const api = new API()
@@ -55,7 +55,7 @@ const main = async () => {
   if (fs.existsSync(catalogDataFilePath)) {
     catalogData = JSON.parse(fs.readFileSync(catalogDataFilePath, 'utf-8'))
   } else {
-    catalogData = await api.getData(`https://bgm.wiki/api/season/${year}-${month}/catalog`)
+    catalogData = await api.getData(`https://bgm.wiki/api/season/${year}-${season}/catalog`)
     fs.writeFileSync(catalogDataFilePath, JSON.stringify(catalogData), 'utf-8')
   }
   console.log(`Get Catalog data Done`)
@@ -98,6 +98,6 @@ const main = async () => {
   }
   const outputFolderPath = path.join(import.meta.dirname, '../data/', langCode)
   fs.mkdirSync(outputFolderPath, { recursive: true })
-  fs.writeFileSync(path.join(outputFolderPath, `${year}-${String(month).padStart(2, '0')}.json`), JSON.stringify(items), 'utf-8')
+  fs.writeFileSync(path.join(outputFolderPath, `${year}-${season}.json`), JSON.stringify(items), 'utf-8')
 }
 main()
